@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Bootstrap</title>
+
+		<!-- jQuery -->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+		<!-- bootstrap -->
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+
+		<!-- fontawesome -->
+		<link href="http://netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+
+		<script src ="http://cdn.pubnub.com/pubnub.min.js"></script>
+
+		<!--Initialize PubNub and tell it to do things when people start typing-->
+		<script type="text/javascript">
+
+			var pubnub;
+
+			$(document).ready(function() {
+
+				pubnub = PUBNUB.init(
+				{	
+					//need this to link users to your chatroom
+					publish_key : "pub-c-00f1c380-eb88-4f86-8b30-b2093ffc705a",
+					subscribe_key : "sub-c-40f27ff6-2fb4-11e4-adbf-02ee2ddab7fe"
+				});
+
+				//tell pubnub which channel to subscribe to and how to handle messages
+				pubnub.subscribe(
+				{
+					channel: "thechatroom",
+					message: handleMessage
+				});
+
+				//when someone submits something into the chat form, tell pubnub to send it out to everyone
+				$("#chatform").submit(function(e)
+				{
+					e.preventDefault() //don't refresh the page when a message gets submitted
+
+					pubnub.publish(
+					{
+						channel: "thechatroom",
+						message: {
+							text: $("#message").val() //set the message text to the message
+						}
+					})
+
+					$("#message").val("");
+				});
+			});
+
+			function handleMessage(message){
+				var d = new Date();
+				var h = d.getUTCHours();
+				var m = d.getUTCMinutes();
+				var s = d.getUTCSeconds();
+				$("#messages").append(message.text + " " + h + ":" + m + ":" + s + "<br/>");
+			}
+
+		</script>
+		
+	</head>
+	<body>
+
+		<!-- navbar -->
+		<div id="nav" class="navbar navbar-inverse navbar-static-top" role="navigation">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#">My Project</a>
+				</div>
+				<div class="collapse navbar-collapse">
+					<ul class="nav navbar-nav">
+						<li><a href="#">Link 1</a></li>
+						<li><a href="#">Link 2</a></li>
+						<li><a href="#">Link 3</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- content -->
+		<div class="container">
+
+			<!-- heading -->
+			<h1>The Chatroom</h1>
+
+			<!--tabs-->
+			<ul class="nav nav-tabs" style="margin-top: 25px">
+				<li class="active"><a href="#">Chat One</a></li>
+				<li><a href="#">Chat Two</a></li>
+				<li><a href="#">Chat Three</a></li>
+			</ul>
+
+			<div class="row">
+
+				<div class="col-md-4 bg-info" style="position:absolute; bottom:20px;">
+					<!--Create form to type the message-->
+					<form id="chatform" style="position:absolute; bottom:20px;">
+						<label>Message</label>
+						<input id="message" type="text" />
+						<input id="chatbtn" type="submit" value="post" />
+					</form>
+				</div>
+
+				<div class="col-md-8 bg-info">
+					<div id="messages"></div>
+				</div>
+				
+			</div>
+		</div>
+
+	</body>
+</html>
